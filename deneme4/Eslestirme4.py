@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 img1 = cv2.imread("2.2f.png")
-img2 = cv2.imread("1.1f.png")
+img2 = cv2.imread("1.2f.png")
 
 copyimg1 = img1.copy()
 copyimg2 = img2.copy()
@@ -70,8 +70,42 @@ def mask_alma_pembe(img):
     mask1 = cv2.inRange(hsv1, lower_pembe, upper_pembe)
     return mask1
 
+def bit_xor(img1,img2,imgson):
+    xor = cv2.bitwise_xor(img1, img2)
+    #cv2.imshow("Xor", xor)
+    xor_blur = cv2.medianBlur(xor,5)
+    #cv2.imshow("Blur Xor",xor)
+
+    contours, hierarchy = cv2.findContours(xor_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    hull = []
+
+    fark = np.zeros((xor.shape[0], xor.shape[1], 3), np.uint8)
+
+    for i in range(len(contours)):
+        area =cv2.contourArea(contours[i])
+        print(area)
+        if area < 200:
+            print("Çıkarıldı")
+        else:
+            print("Eklendi")
+            (x,y,w,h) = cv2.boundingRect(contours[i])
+            cv2.rectangle(imgson,(x-5,y-5),(x+w+5,y+h+5),(0,0,255),1)
+            hull.append(cv2.convexHull(contours[i], False))
+
+
+
+    for i in range(len(contours)):
+        cv2.drawContours(fark, contours, i, (255, 255, 255), 1, 8)
+    for i in range(len(hull)):
+        cv2.drawContours(fark, hull, i, (0, 255, 0), 1, 8)
+    return (xor,xor_blur,fark)
+
 pe1 = mask_alma_pembe(img1)
 pe2 = mask_alma_pembe(img2)
+
+cv2.imshow("pe1",pe1)
+cv2.imshow("pe2",pe2)
 
 erode1 = cv2.erode(pe1,kernel,iterations = 3)
 erode2 = cv2.erode(pe2,kernel,iterations = 3)
@@ -335,15 +369,34 @@ h, mask = cv2.findHomography(keypoints1, keypoints2, cv2.RANSAC)
 height, width, channels = img2.shape
 warped = cv2.warpPerspective(copyimg1, h, (width, height))
 
-added = cv2.addWeighted(bitwise_alma(warped),0.5,copyimg2,0.5,0)
+
+resized = cv2.resize(img2,(img1.shape[1],img1.shape[0]))
+res = np.concatenate((img1,resized),axis=1)
+cv2.imshow("Res", res)
+
+pWarped = mask_alma_pembe(warped)
+pIMG2 = mask_alma_pembe(img2)
+
+sonuc = bit_xor(pWarped,pIMG2,img2)
+cv2.imshow("XOR BLUR Pembe", sonuc[1])
+cv2.imshow("SONUC Pembe", sonuc[2])
+
+mWarped = mask_alma_beyaz(warped)
+mIMG2 = mask_alma_beyaz(img2)
+
+sonuc2 = bit_xor(mWarped, mIMG2,img2)
+cv2.imshow("XOR BLUR Beyaz", sonuc2[1])
+cv2.imshow("SONUC Beyaz", sonuc2[2])
+
+added = cv2.addWeighted(bitwise_alma(warped),0.4,copyimg2,0.6,0)
 cv2.imshow("Added", added)
 
 
 cv2.imshow("img1zero",img1zero)
 cv2.imshow("img2zero",img2zero)
 
-cv2.imshow("IMG 1",img1)
-cv2.imshow("IMG 2",img2)
+#cv2.imshow("IMG 1",img1)
+#cv2.imshow("IMG 2",img2)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

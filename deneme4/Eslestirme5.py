@@ -8,6 +8,7 @@ copyimg1 = img1.copy()
 copyimg2 = img2.copy()
 
 img1zero = np.zeros((img1.shape[0],img1.shape[1],3), np.uint8)
+img3zero =  np.zeros((img2.shape[0],img2.shape[1],3), np.uint8)
 img1k = np.zeros((img1.shape[0],img1.shape[1],3), np.uint8)
 img1y = np.zeros((img1.shape[0],img1.shape[1],3), np.uint8)
 img1m = np.zeros((img1.shape[0],img1.shape[1],3), np.uint8)
@@ -37,6 +38,22 @@ def bitwise_alma(img):
 
     top_bitwise =cv2.add(bitwise1,bitwise2)
     return top_bitwise
+
+def mask_alma(img):
+    hsv1 = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+    lower_pembe = np.array([148, 0, 100])
+    upper_pembe = np.array([179, 255, 255])
+
+    mask1 = cv2.inRange(hsv1, lower_pembe, upper_pembe)
+
+    lower_beyaz = np.array([30, 0, 180])
+    upper_beyaz = np.array([85, 100, 255])
+
+    hsv2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask2 = cv2.inRange(hsv2, lower_beyaz, upper_beyaz)
+
+    top_mask =cv2.add(mask1,mask2)
+    return top_mask
 
 def mask_alma_beyaz(img):
     lower_beyaz = np.array([30, 0, 180])
@@ -123,26 +140,26 @@ sobelX1 = np.uint8(abs_sobelx1)
 
 sobelSag1 = sobelX1-sobelSol1
 
-contours, hierarchy = cv2.findContours(sobelSol1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(sobelSol1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
 
 for i in range(len(contours)):
     a = 0
     area =cv2.contourArea(contours[i])
     if area > 50:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img1zero,(x+3,y),(x+w+3,y+h),(0,0,255),-1)
+        cv2.rectangle(img1zero,(x+3,y),(x+w+8,y+h),(0,0,255),-1)
         cv2.circle(img1k, (x+3, y), 25, (0, 0, 255), -1, -1)
 
 
 
-contours, hierarchy = cv2.findContours(sobelSag1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(sobelSag1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
 
 
 for i in range(len(contours)):
     area =cv2.contourArea(contours[i])
     if area > 30:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img1zero,(x-3,y),(x+w-3,y+h),(0,255,0),1)
+        cv2.rectangle(img1zero,(x-8,y),(x+w-3,y+h),(0,0,255),-1)
         cv2.circle(img1y, (x-3, y), 25, (0, 255, 0), -1, -1)
 
 sobelUst1 = cv2.Sobel(erode1,cv2.CV_8U,0,1,ksize=1)
@@ -159,7 +176,7 @@ for i in range(len(contours)):
     area =cv2.contourArea(contours[i])
     if area > 40:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img1zero,(x,y),(x+w,y+h),(255,0,0),-1)
+        cv2.rectangle(img1zero,(x,y),(x+w,y+h+5),(0,0,255),-1)
         cv2.circle(img1m, (x, y), 5, (255, 0, 0), -1, -1)
 
 contours, hierarchy = cv2.findContours(sobelAlt1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -173,7 +190,7 @@ for i in range(len(contours)):
         listeAlt1.append(cv2.boundingRect(contours[i]))
         listeAltAlan1.append(cv2.contourArea(contours[i]))
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img1zero,(x,y),(x+w,y+h),(255,255,0),1)
+        cv2.rectangle(img1zero,(x,y-5),(x+w,y+h),(0,0,255),-1)
         cv2.circle(img1m, (x, y), 5, (255, 255, 0), -1, -1)
 
 sortedListeAltAlan = sorted(listeAltAlan1)
@@ -255,7 +272,7 @@ for i in range(len(contours)):
     area =cv2.contourArea(contours[i])
     if area > 50:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img2zero,(x+3,y),(x+w+3,y+h),(0,0,255),-1)
+        cv2.rectangle(img2zero,(x+3,y),(x+w+8,y+h),(0,0,255),-1)
         cv2.circle(img2k, (x+3, y), 25, (0, 0, 255), -1, -1)
 
 
@@ -268,7 +285,7 @@ for i in range(len(contours)):
     #print(area)
     if area > 30:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img2zero,(x-3,y),(x+w-3,y+h),(0,255,0),-1)
+        cv2.rectangle(img2zero,(x-8,y),(x+w-3,y+h),(0,0,255),-1)
         cv2.circle(img2y, (x-3, y), 25, (0, 255, 0), -1, -1)
 
 sobelUst2 = cv2.Sobel(erode2,cv2.CV_8U,0,1,ksize=1)
@@ -285,7 +302,7 @@ for i in range(len(contours)):
     area =cv2.contourArea(contours[i])
     if area > 40:
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img2zero,(x,y),(x+w,y+h),(255,0,0),-1)
+        cv2.rectangle(img2zero,(x,y),(x+w,y+h+5),(0,0,255),-1)
         cv2.circle(img2m, (x, y), 5, (255, 0, 0), -1, -1)
 
 contours, hierarchy = cv2.findContours(sobelAlt2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -299,7 +316,7 @@ for i in range(len(contours)):
         listeAlt2.append(cv2.boundingRect(contours[i]))
         listeAltAlan2.append(cv2.contourArea(contours[i]))
         (x,y,w,h) = cv2.boundingRect(contours[i])
-        cv2.rectangle(img2zero,(x,y),(x+w,y+h),(255,255,0),1)
+        cv2.rectangle(img2zero,(x,y-5),(x+w,y+h),(0,0,255),-1)
         cv2.circle(img2m, (x, y), 5, (255, 255, 0), -1, -1)
 
 sortedListeAltAlan2 = sorted(listeAltAlan2)
@@ -365,26 +382,149 @@ print(points2)
 keypoints1 = np.float32(points1)
 keypoints2 = np.float32(points2)
 
+
+
+#######################################################################################################################
+erode1 = cv2.erode(mask_alma(img2),kernel,iterations = 3)
+
+sobelSol1 = cv2.Sobel(erode1,cv2.CV_8U,1,0,ksize=1)
+
+sobelx1 = cv2.Sobel(erode1,cv2.CV_64F,1,0,ksize=1)
+abs_sobelx1 = np.absolute(sobelx1)
+sobelX1 = np.uint8(abs_sobelx1)
+
+sobelSag1 = sobelX1-sobelSol1
+
+contours, hierarchy = cv2.findContours(sobelSol1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+
+for i in range(len(contours)):
+    a = 0
+    area =cv2.contourArea(contours[i])
+    if area > 50:
+        (x,y,w,h) = cv2.boundingRect(contours[i])
+        cv2.rectangle(img3zero,(x+3,y),(x+w+8,y+h),(0,0,255),-1)
+        cv2.circle(img1k, (x+3, y), 25, (0, 0, 255), -1, -1)
+
+
+
+contours, hierarchy = cv2.findContours(sobelSag1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+
+
+for i in range(len(contours)):
+    area =cv2.contourArea(contours[i])
+    if area > 30:
+        (x,y,w,h) = cv2.boundingRect(contours[i])
+        cv2.rectangle(img3zero,(x-8,y),(x+w-3,y+h),(0,0,255),-1)
+        cv2.circle(img1y, (x-3, y), 25, (0, 255, 0), -1, -1)
+
+sobelUst1 = cv2.Sobel(erode1,cv2.CV_8U,0,1,ksize=1)
+
+sobely1 = cv2.Sobel(erode1,cv2.CV_64F,0,1,ksize=1)
+abs_sobely1 = np.absolute(sobely1)
+sobelY1 = np.uint8(abs_sobely1)
+
+sobelAlt1 = sobelY1 - sobelUst1
+
+contours, hierarchy = cv2.findContours(sobelUst1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+for i in range(len(contours)):
+    area =cv2.contourArea(contours[i])
+    if area > 40:
+        (x,y,w,h) = cv2.boundingRect(contours[i])
+        cv2.rectangle(img3zero,(x,y),(x+w,y+h+5),(0,0,255),-1)
+        cv2.circle(img1m, (x, y), 5, (255, 0, 0), -1, -1)
+
+contours, hierarchy = cv2.findContours(sobelAlt1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+listeAlt1 = []
+listeAltAlan1 = []
+
+for i in range(len(contours)):
+    area =cv2.contourArea(contours[i])
+    if area > 10:
+        listeAlt1.append(cv2.boundingRect(contours[i]))
+        listeAltAlan1.append(cv2.contourArea(contours[i]))
+        (x,y,w,h) = cv2.boundingRect(contours[i])
+        cv2.rectangle(img3zero,(x,y-5),(x+w,y+h),(0,0,255),-1)
+        cv2.circle(img1m, (x, y), 5, (255, 255, 0), -1, -1)
+
+sortedListeAltAlan = sorted(listeAltAlan1)
+if sortedListeAltAlan[0] == sortedListeAltAlan[1]:
+    g = (i for i, n in enumerate(listeAltAlan1) if n == sortedListeAltAlan[0])
+    kucuk1index = next(g)
+    kucuk2index = next(g)
+else :
+    kucuk1index = listeAltAlan1.index(sortedListeAltAlan[0])
+    kucuk2index = listeAltAlan1.index(sortedListeAltAlan[1])
+
+
+print(sortedListeAltAlan)
+print(listeAltAlan1)
+print(kucuk1index)
+print(kucuk2index)
+
+(x1,y1,w1,h1) = listeAlt1[kucuk1index]
+cv2.circle(img1, (int(x1+(w1)/2), int(y1+(h1)/2)), 3, (255, 0, 255), -1, -1)
+(x2,y2,w2,h2) = listeAlt1[kucuk2index]
+cv2.circle(img1, (int(x2+(w2)/2), int(y2+(h2)/2)), 3, (255, 0, 255), -1, -1)
+
+if x1 > x2:
+    points1.append((int(x2+(w2)/2), int(y2+(h2)/2)))
+    points1.append((int(x1+(w1)/2), int(y1+(h1)/2)))
+else:
+    points1.append((int(x1+(w1)/2), int(y1+(h1)/2)))
+    points1.append((int(x2+(w2)/2), int(y2+(h2)/2)))
+
+
+img1ky = img1k + img1y
+sariMask = mask_alma_sari(img1ky)
+
+contours, hierarchy = cv2.findContours(sariMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+for i in range(len(contours)):
+    (x, y, w, h) = cv2.boundingRect(contours[i])
+    cv2.circle(img1, (int(x+(w/2)), int(y+(h/2))), 5, (255, 0, 0), 1, -1)
+    cv2.circle(img1ky, (int(x + (w / 2)), int(y + (h / 2))), 50, (0, 0, 0), -1, -1)
+cv2.imshow("son",img1ky)
+
+imgKS = mask_alma_kirmizi_yesil(img1ky)
+contours, hierarchy = cv2.findContours(imgKS, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+sutun1 = []
+sutunX = []
+
+for i in range(len(contours)):
+    (x, y, w, h) = cv2.boundingRect(contours[i])
+    sutun1.append((int(x+(w/2)), int(y+(h/2))))
+    sutunX.append(x)
+    cv2.circle(img1, (int(x+(w/2)), int(y+(h/2))), 5, (0, 0, 255), 1, -1)
+
+
+for i in range(4):
+    nokta1X = min(sutunX)
+    nokta1index = sutunX.index(nokta1X)
+    points1.append(sutun1[nokta1index])
+    del sutunX[nokta1index]
+    del sutun1[nokta1index]
+
+print(points1)
+
+#######################################################################################################################
+
 h, mask = cv2.findHomography(keypoints1, keypoints2, cv2.RANSAC)
 height, width, channels = img2.shape
-warped = cv2.warpPerspective(copyimg1, h, (width, height))
+warped = cv2.warpPerspective(img1zero, h, (width, height))
 
-
+cv2.imshow("3",img3zero)
 
 
 pWarped = mask_alma_pembe(warped)
 pIMG2 = mask_alma_pembe(img2)
 
-sonuc = bit_xor(pWarped,pIMG2,img2)
+sonuc = bit_xor(mask_alma_kirmizi_yesil(warped),mask_alma_kirmizi_yesil(img3zero),img2)
 #cv2.imshow("XOR BLUR Pembe", sonuc[1])
 cv2.imshow("SONUC Pembe", sonuc[2])
 
-mWarped = mask_alma_beyaz(warped)
-mIMG2 = mask_alma_beyaz(img2)
-
-sonuc2 = bit_xor(mWarped, mIMG2,img2)
-#cv2.imshow("XOR BLUR Beyaz", sonuc2[1])
-cv2.imshow("SONUC Beyaz", sonuc2[2])
 
 added = cv2.addWeighted(bitwise_alma(warped),0.4,copyimg2,0.6,0)
 cv2.imshow("Added", added)
